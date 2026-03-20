@@ -38,6 +38,18 @@ export const authAPI = {
   login: (data) => api.post('/auth/login', data),
 };
 
+// F2: Skills API
+
+export const skillsAPI = {
+  getAllSkills: () => api.get('/skills'),
+  searchSkills: (name) => api.get(`/skills/search?name=${name}`),
+  getMyTeachingSkills: () => api.get('/skills/my/teaching'),
+  getMyLearningSkills: () => api.get('/skills/my/learning'),
+  addTeachingSkill: (data) => api.post('/skills/my/teaching', data),
+  addLearningSkill: (data) => api.post('/skills/my/learning', data),
+  removeTeachingSkill: (skillId) => api.delete(`/skills/my/teaching/${skillId}`),
+  removeLearningSkill: (skillId) => api.delete(`/skills/my/learning/${skillId}`),
+};
 
 
 export default api;
