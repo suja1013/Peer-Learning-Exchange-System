@@ -1,0 +1,48 @@
+name: Peer Learning CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # ================= BACKEND (Spring Boot) =================
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Build Backend (Spring Boot)
+      run: |
+        if [ -f backend/pom.xml ]; then
+          echo "Building Spring Boot backend..."
+          cd backend
+          mvn clean install
+        else
+          echo "No backend found or pom.xml missing"
+        fi
+
+    # ================= FRONTEND (React) =================
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Build Frontend (React)
+      run: |
+        if [ -f frontend/package.json ]; then
+          echo "Building React frontend..."
+          cd frontend
+          npm ci
+          npm run build
+        else
+          echo "No frontend found or package.json missing"
+        fi
