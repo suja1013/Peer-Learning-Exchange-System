@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: Peer Learning CI Pipeline
 
 on:
   push:
@@ -10,11 +10,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Run Build
-      run: echo "Building project..."
+    # ================= BACKEND (Spring Boot) =================
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
 
-    - name: Run Tests
-      run: echo "Running tests..."
+    - name: Build Backend (Spring Boot)
+      run: |
+        if [ -f backend/pom.xml ]; then
+          echo "Building Spring Boot backend..."
+          cd backend
+          mvn clean install
+        else
+          echo "No backend found or pom.xml missing"
+        fi
+
+    # ================= FRONTEND (React) =================
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Build Frontend (React)
+      run: |
+        if [ -f frontend/package.json ]; then
+          echo "Building React frontend..."
+          cd frontend
+          npm install
+          npm run build
+        else
+          echo "No frontend found or package.json missing"
+        fi
