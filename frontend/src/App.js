@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Login, Register } from './components/auth/AuthForms';
 import { Dashboard } from './components/dashboard/Dashboard';
+import { SkillsManager } from './components/skills/SkillsManager';
 
 // Protected route wrapper
 const PrivateRoute = ({ children }) => {
@@ -40,6 +41,10 @@ function AppRoutes() {
       <Route path="/dashboard" element={
         <PrivateRoute><Dashboard /></PrivateRoute>
       } />
+
+       <Route path="/skills" element={
+              <PrivateRoute><PageLayout><SkillsManager /></PageLayout></PrivateRoute>
+            } />
 
       <Route path="/" element={<Navigate to="/dashboard" />} />
       <Route path="*" element={<Navigate to="/dashboard" />} />

@@ -1,19 +1,19 @@
 package com.peerlearningsystem.controller;
 
 import com.peerlearningsystem.dto.AuthResponse;
+import com.peerlearningsystem.dto.ErrorResponse;
 import com.peerlearningsystem.dto.LoginRequest;
 import com.peerlearningsystem.dto.RegisterRequest;
-import com.peerlearningsystem.exception.CustomException;
+
 import com.peerlearningsystem.model.User;
-import com.peerlearningsystem.repository.UserRepository;
-import com.peerlearningsystem.security.JwtUtils;
+
+import com.peerlearningsystem.service.AuthService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.web.bind.annotation.*;
 
 
@@ -23,55 +23,33 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     @Autowired
-    public UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtUtils jwtUtils;
+    private final AuthService authService;
 
-    @Value("${app.points.registration-bonus}")
-    private Integer registrationBonus;
-
-
+    // POST /api/auth/register
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.badRequest().body(new CustomException("Email already in use"));
+        try {
+            User user = authService.register(
+                    request.getUsername(), request.getEmail(),
+                    request.getPassword(), request.getFullName(), request.getRole()
+            );
+            String token = authService.generateToken(user.getEmail());
+            return ResponseEntity.ok(new AuthResponse(token, user));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
-
-        User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .fullName(request.getFullName())
-                .role(request.getRole() != null ? request.getRole() : User.UserRole.BOTH)
-                .activationPoints(registrationBonus)
-                .isActive(true)
-                .build();
-
-        User saved = userRepository.save(user);
-        String token = jwtUtils.generateToken(saved.getEmail());
-
-        return ResponseEntity.ok(new AuthResponse(token, saved.getId(), saved.getUsername(),
-                saved.getEmail(), saved.getRole(), saved.getActivationPoints()));
     }
 
-
+    // POST /api/auth/login
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElse(null);
+        try {
+            User user = authService.login(request.getEmail(), request.getPassword());
+            String token = authService.generateToken(user.getEmail());
+            return ResponseEntity.ok(new AuthResponse(token, user));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
 
-        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            return ResponseEntity.badRequest().body(new CustomException("Invalid email or password"));
         }
-
-        if (!user.getIsActive()) {
-            return ResponseEntity.badRequest().body(new CustomException("Account is deactivated"));
-        }
-
-        String token = jwtUtils.generateToken(user.getEmail());
-        return ResponseEntity.ok(new AuthResponse(token, user.getId(), user.getUsername(),
-                user.getEmail(), user.getRole(), user.getActivationPoints()));
     }
-
-
 }

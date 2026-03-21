@@ -13,4 +13,13 @@ public class AuthResponse {
     private String email;
     private User.UserRole role;
     private Integer activationPoints;
+
+    public AuthResponse(String token, User user) {
+        this.token            = token;
+        this.userId           = user.getId();
+        this.username         = user.getUsername();
+        this.email            = user.getEmail();
+        this.role             = user.getRole();
+        this.activationPoints = user.getActivationPoints();
+    }
 }

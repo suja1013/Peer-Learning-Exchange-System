@@ -1,5 +1,6 @@
 package com.peerlearningsystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -44,12 +45,14 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-//    // F2 relationships
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private Set<UserTeachingSkill> teachingSkills = new HashSet<>();
-//
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private Set<UserLearningSkill> learningSkills = new HashSet<>();
+    // F2 relationships
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<UserTeachingSkill> teachingSkills = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<UserLearningSkill> learningSkills = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
