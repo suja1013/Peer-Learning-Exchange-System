@@ -6,6 +6,8 @@ import { Login, Register } from './components/auth/AuthForms';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { SkillsManager } from './components/skills/SkillsManager';
 import { SearchTutors } from './components/tutorsearch/SearchTutors';
+import { SessionRequests } from './components/requests/SessionRequests';
+import { SendRequest }     from './components/requests/SendRequest';
 
 // Protected route wrapper
 const PrivateRoute = ({ children }) => {
@@ -49,6 +51,9 @@ function AppRoutes() {
       
       
       <Route path="/search" element={<PrivateRoute><SearchTutors /></PrivateRoute>} />
+
+      <Route path="/requests" element={<PrivateRoute><SessionRequests /></PrivateRoute>} />
+      <Route path="/requests/send/:tutorId" element={<PrivateRoute><SendRequest /></PrivateRoute>} />
 
       <Route path="/" element={<Navigate to="/dashboard" />} />
       <Route path="*" element={<Navigate to="/dashboard" />} />
