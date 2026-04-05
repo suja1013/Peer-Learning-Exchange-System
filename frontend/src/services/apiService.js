@@ -51,10 +51,20 @@ export const skillsAPI = {
   removeLearningSkill: (skillId) => api.delete(`/skills/my/learning/${skillId}`),
 };
 
-// ── F3: Tutor Search 
+// F3: Tutor Search 
 export const tutorsAPI = {
   searchBySkillName: (skillName) => api.get('/tutors/search', { params: { skillName } }),
   searchBySkillId:   (skillId)   => api.get('/tutors/search', { params: { skillId } }),
+};
+
+// F4: Manage Requests
+export const requestsAPI = {
+  send:        (data) => api.post('/requests', data),
+  getIncoming: ()     => api.get('/requests/incoming'),
+  getOutgoing: ()     => api.get('/requests/outgoing'),
+  accept:      (id)   => api.put(`/requests/${id}/accept`),
+  reject:      (id)   => api.put(`/requests/${id}/reject`),
+  cancel:      (id)   => api.put(`/requests/${id}/cancel`),
 };
 
 
