@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Login, Register } from './components/auth/AuthForms';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { SkillsManager } from './components/skills/SkillsManager';
+import { SearchTutors } from './components/tutorsearch/SearchTutors';
 
 // Protected route wrapper
 const PrivateRoute = ({ children }) => {
@@ -45,6 +46,9 @@ function AppRoutes() {
        <Route path="/skills" element={
               <PrivateRoute><PageLayout><SkillsManager /></PageLayout></PrivateRoute>
             } />
+      
+      
+      <Route path="/search" element={<PrivateRoute><SearchTutors /></PrivateRoute>} />
 
       <Route path="/" element={<Navigate to="/dashboard" />} />
       <Route path="*" element={<Navigate to="/dashboard" />} />
