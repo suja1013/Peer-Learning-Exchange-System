@@ -51,5 +51,11 @@ export const skillsAPI = {
   removeLearningSkill: (skillId) => api.delete(`/skills/my/learning/${skillId}`),
 };
 
+// ── F3: Tutor Search 
+export const tutorsAPI = {
+  searchBySkillName: (skillName) => api.get('/tutors/search', { params: { skillName } }),
+  searchBySkillId:   (skillId)   => api.get('/tutors/search', { params: { skillId } }),
+};
+
 
 export default api;
