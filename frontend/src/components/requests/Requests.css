@@ -282,3 +282,64 @@
   justify-content: flex-end;
   margin: 16px 0 24px 0; /* top right bottom left */
 }
+
+/* Meeting info shown inline on card */
+.req-meeting-info {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #ebf4ff;
+  border: 1px solid #bee3f8;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.req-meeting-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2b6cb0;
+}
+
+.req-meeting-link {
+  font-size: 13px;
+  color: #4c51bf;
+  word-break: break-all;
+  text-decoration: underline;
+}
+
+.req-meeting-time {
+  font-size: 12px;
+  color: #718096;
+}
+
+.req-meeting-sent {
+  font-size: 13px;
+  font-weight: 600;
+  color: #276749;
+  padding: 8px 12px;
+  background: #c6f6d5;
+  border-radius: 8px;
+}
+
+.req-waiting {
+  font-size: 13px;
+  color: #c05621;
+  padding: 8px 12px;
+  background: #fffaf0;
+  border: 1px solid #fbd38d;
+  border-radius: 8px;
+}
+
+.req-join-btn {
+  padding: 8px 18px;
+  background: #4c51bf;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
