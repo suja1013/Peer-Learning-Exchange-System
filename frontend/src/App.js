@@ -8,6 +8,7 @@ import { SkillsManager } from './components/skills/SkillsManager';
 import { SearchTutors } from './components/tutorsearch/SearchTutors';
 import { SessionRequests } from './components/requests/SessionRequests';
 import { SendRequest }     from './components/requests/SendRequest';
+import { Meetings, CreateMeeting } from './components/meetings/Meetings';
 
 // Protected route wrapper
 const PrivateRoute = ({ children }) => {
@@ -54,6 +55,9 @@ function AppRoutes() {
 
       <Route path="/requests" element={<PrivateRoute><SessionRequests /></PrivateRoute>} />
       <Route path="/requests/send/:tutorId" element={<PrivateRoute><SendRequest /></PrivateRoute>} />
+
+      <Route path="/meetings" element={<PrivateRoute><Meetings /></PrivateRoute>} />
+      <Route path="/meetings/create/:requestId" element={<PrivateRoute><CreateMeeting /></PrivateRoute>} />
 
       <Route path="/" element={<Navigate to="/dashboard" />} />
       <Route path="*" element={<Navigate to="/dashboard" />} />

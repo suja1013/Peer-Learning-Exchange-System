@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { requestsAPI } from '../../services/apiService';
+import { requestsAPI, meetingsAPI } from '../../services/apiService';
 import './Requests.css';
 
 export const SessionRequests = () => {
@@ -11,31 +11,43 @@ export const SessionRequests = () => {
   const [outgoing, setOutgoing] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionError, setActionError] = useState('');
+  // requestId → meeting object
+  const [meetingMap, setMeetingMap] = useState({});
 
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
-     setLoading(true);
-  try {
-    const [inc, out] = await Promise.all([
-      requestsAPI.getIncoming(),
-      requestsAPI.getOutgoing(),
-    ]);
+    setLoading(true);
+    try {
+      const [inc, out, myMeetings] = await Promise.all([
+        requestsAPI.getIncoming(),
+        requestsAPI.getOutgoing(),
+        meetingsAPI.getMyMeetings(),
+      ]);
 
-    // Hide cancelled requests from tutor incoming list
-    const filteredIncoming = inc.data.filter(
-      (req) => req.status !== 'CANCELLED'
-    );
+      // Hide cancelled requests from tutor incoming list only
+      const filteredIncoming = (inc.data || []).filter(
+        (req) => req.status !== 'CANCELLED'
+      );
 
-    setIncoming(filteredIncoming);
-    setOutgoing(out.data);
-  } catch (err) {
-    setActionError('Failed to load requests.');
-  } finally {
-    setLoading(false);
-  }
+      setIncoming(filteredIncoming);
+      setOutgoing(out.data || []);
+
+      // Build map: sessionRequest.id → meeting
+      const map = {};
+      (myMeetings.data || []).forEach((m) => {
+        if (m.sessionRequest?.id) {
+          map[m.sessionRequest.id] = m;
+        }
+      });
+      setMeetingMap(map);
+    } catch (err) {
+      setActionError('Failed to load requests.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const doAction = async (apiFn) => {
@@ -56,80 +68,142 @@ export const SessionRequests = () => {
     COMPLETED: '#4c51bf',
   };
 
-  const RequestCard = ({ req, isIncoming }) => (
-    <div className="req-card">
-      <div className="req-card-header">
-        <div>
-          <div className="req-card-name">
-            {isIncoming ? req.learner?.fullName : req.tutor?.fullName}
-            <span className="req-card-username">
-              @{isIncoming ? req.learner?.username : req.tutor?.username}
-            </span>
+  // Safely resolve display name — backend may return email in fullName field
+  const displayName = (user) => user?.fullName || user?.email || 'Unknown';
+
+  const RequestCard = ({ req, isIncoming }) => {
+    const meeting = meetingMap[req.id] || null;
+    const hasMeeting = !!meeting;
+
+    return (
+      <div className="req-card">
+        <div className="req-card-header">
+          <div style={{ flex: 1 }}>
+            <div className="req-card-name">
+              {isIncoming ? displayName(req.learner) : displayName(req.tutor)}
+              <span className="req-card-username">
+                @{isIncoming ? req.learner?.username : req.tutor?.username}
+              </span>
+            </div>
+
+            {req.skill && (
+              <div className="req-card-skill">🎯 {req.skill.name}</div>
+            )}
+
+            {req.message && (
+              <div className="req-card-message">"{req.message}"</div>
+            )}
+
+            {hasMeeting && (
+              <div className="req-meeting-info">
+                <span className="req-meeting-label">🔗 Meeting link:</span>
+                <a
+                  href={meeting.meetingLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="req-meeting-link"
+                >
+                  {meeting.meetingLink}
+                </a>
+                {meeting.scheduledAt && (
+                  <div className="req-meeting-time">
+                    🕐 {new Date(meeting.scheduledAt).toLocaleString()}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {req.skill && (
-            <div className="req-card-skill">🎯 {req.skill.name}</div>
-          )}
-
-          {req.message && (
-            <div className="req-card-message">"{req.message}"</div>
-          )}
+          <span
+            className="req-status"
+            style={{
+              background: `${statusColor[req.status]}22`,
+              color: statusColor[req.status],
+            }}
+          >
+            {req.status}
+          </span>
         </div>
 
-        <span
-          className="req-status"
-          style={{
-            background: `${statusColor[req.status]}22`,
-            color: statusColor[req.status],
-          }}
-        >
-          {req.status}
-        </span>
-      </div>
+        <div className="req-card-actions">
+          {/* TUTOR view (incoming tab) */}
+          {isIncoming && req.status === 'PENDING' && (
+            <>
+              <button
+                className="req-accept-btn"
+                onClick={() => doAction(() => requestsAPI.accept(req.id))}
+              >
+                ✓ Accept
+              </button>
+              <button
+                className="req-reject-btn"
+                onClick={() => doAction(() => requestsAPI.reject(req.id))}
+              >
+                ✗ Reject
+              </button>
+            </>
+          )}
 
-      <div className="req-card-actions">
-        {isIncoming && req.status === 'PENDING' && (
-          <>
+          {isIncoming && req.status === 'ACCEPTED' && !hasMeeting && (
             <button
-              className="req-accept-btn"
-              onClick={() => doAction(() => requestsAPI.accept(req.id))}
+              className="req-meeting-btn"
+              onClick={() => navigate(`/meetings/create/${req.id}`)}
             >
-              ✓ Accept
+              + Add Meeting Link
             </button>
+          )}
 
+          {isIncoming && req.status === 'ACCEPTED' && hasMeeting && (
+            <span className="req-meeting-sent">✅ Meeting link sent to learner</span>
+          )}
+
+          {/* LEARNER view (outgoing tab) */}
+          {!isIncoming && req.status === 'PENDING' && (
             <button
-              className="req-reject-btn"
-              onClick={() => doAction(() => requestsAPI.reject(req.id))}
+              className="req-cancel-action-btn"
+              onClick={() => doAction(() => requestsAPI.cancel(req.id))}
             >
-              ✗ Reject
+              Cancel Request
             </button>
-          </>
-        )}
+          )}
 
-        {isIncoming && req.status === 'ACCEPTED' && (
-          <button
-            className="req-meeting-btn"
-            onClick={() => navigate(`/meetings/create/${req.id}`)}
-          >
-            + Add Meeting Link
-          </button>
-        )}
+          {!isIncoming && req.status === 'ACCEPTED' && !hasMeeting && (
+            <span className="req-waiting">⏳ Waiting for tutor to send meeting link...</span>
+          )}
 
-        {!isIncoming && req.status === 'PENDING' && (
-          <button
-            className="req-cancel-action-btn"
-            onClick={() => doAction(() => requestsAPI.cancel(req.id))}
-          >
-            Cancel Request
-          </button>
-        )}
+          {/* {!isIncoming && req.status === 'ACCEPTED' && hasMeeting && (
+            <>
+              <a
+                href={meeting.meetingLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="req-join-btn"
+              >
+                🔗 Join Meeting
+              </a>
+              <button
+                className="req-complete-btn"
+                onClick={() => doAction(() => requestsAPI.complete(req.id))}
+              >
+                ✓ Confirm Session Completed
+              </button>
+            </>
+          )}
+
+          {!isIncoming && req.status === 'COMPLETED' && hasMeeting && (
+            <button
+              className="req-rate-btn"
+              onClick={() => navigate(`/ratings/submit?meetingId=${meeting.id}`)}
+            >
+              ⭐ Rate Tutor
+            </button>
+          )} */}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
-  if (loading) {
-    return <div className="requests-loading">Loading requests...</div>;
-  }
+  if (loading) return <div className="requests-loading">Loading requests...</div>;
 
   const list = tab === 'incoming' ? incoming : outgoing;
 
@@ -158,17 +232,16 @@ export const SessionRequests = () => {
         ))}
       </div>
 
-      {tab === 'outgoing' && (
-        <div className="req-search-top">
-          <button className="req-find-btn" onClick={() => navigate('/search')}>
-            Find Tutors
-          </button>
-        </div>
-      )}
-
       <div className="req-list">
         {list.length === 0 ? (
-          <div className="req-empty">No {tab} requests yet.</div>
+          <div className="req-empty">
+            No {tab} requests yet.
+            {tab === 'outgoing' && (
+              <button className="req-find-btn" onClick={() => navigate('/search')}>
+                Find Tutors
+              </button>
+            )}
+          </div>
         ) : (
           list.map((req) => (
             <RequestCard

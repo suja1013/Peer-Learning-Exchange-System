@@ -67,5 +67,12 @@ export const requestsAPI = {
   cancel:      (id)   => api.put(`/requests/${id}/cancel`),
 };
 
+// F5: Meetings
+export const meetingsAPI = {
+  create:           (data)      => api.post('/meetings', data),
+  getMyMeetings:    ()          => api.get('/meetings'),
+  getMeeting:       (id)        => api.get(`/meetings/${id}`),
+  getByRequestId:   (requestId) => api.get(`/meetings/request/${requestId}`),
+};
 
 export default api;
