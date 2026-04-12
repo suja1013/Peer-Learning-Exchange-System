@@ -1,3 +1,8 @@
+
+// src/components/requests/SessionRequests.js
+// F4: Manage incoming/outgoing session requests
+// F6: Learner confirms session completion → transfers points
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { requestsAPI, meetingsAPI } from '../../services/apiService';
@@ -11,7 +16,6 @@ export const SessionRequests = () => {
   const [outgoing, setOutgoing] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionError, setActionError] = useState('');
-  // requestId → meeting object
   const [meetingMap, setMeetingMap] = useState({});
 
   useEffect(() => {
@@ -27,7 +31,6 @@ export const SessionRequests = () => {
         meetingsAPI.getMyMeetings(),
       ]);
 
-      // Hide cancelled requests from tutor incoming list only
       const filteredIncoming = (inc.data || []).filter(
         (req) => req.status !== 'CANCELLED'
       );
@@ -35,7 +38,6 @@ export const SessionRequests = () => {
       setIncoming(filteredIncoming);
       setOutgoing(out.data || []);
 
-      // Build map: sessionRequest.id → meeting
       const map = {};
       (myMeetings.data || []).forEach((m) => {
         if (m.sessionRequest?.id) {
@@ -68,12 +70,18 @@ export const SessionRequests = () => {
     COMPLETED: '#4c51bf',
   };
 
-  // Safely resolve display name — backend may return email in fullName field
   const displayName = (user) => user?.fullName || user?.email || 'Unknown';
+
+  const canComplete = (meeting) => {
+    if (!meeting) return false;
+    if (!meeting.scheduledAt) return true;
+    return new Date() >= new Date(meeting.scheduledAt);
+  };
 
   const RequestCard = ({ req, isIncoming }) => {
     const meeting = meetingMap[req.id] || null;
     const hasMeeting = !!meeting;
+    const allowComplete = canComplete(meeting);
 
     return (
       <div className="req-card">
@@ -107,7 +115,7 @@ export const SessionRequests = () => {
                 </a>
                 {meeting.scheduledAt && (
                   <div className="req-meeting-time">
-                    🕐 {new Date(meeting.scheduledAt).toLocaleString()}
+                    🕐 Scheduled: {new Date(meeting.scheduledAt).toLocaleString()}
                   </div>
                 )}
               </div>
@@ -126,7 +134,6 @@ export const SessionRequests = () => {
         </div>
 
         <div className="req-card-actions">
-          {/* TUTOR view (incoming tab) */}
           {isIncoming && req.status === 'PENDING' && (
             <>
               <button
@@ -154,10 +161,11 @@ export const SessionRequests = () => {
           )}
 
           {isIncoming && req.status === 'ACCEPTED' && hasMeeting && (
-            <span className="req-meeting-sent">✅ Meeting link sent to learner</span>
+            <span className="req-meeting-sent">
+              ✅ Meeting link sent to learner
+            </span>
           )}
 
-          {/* LEARNER view (outgoing tab) */}
           {!isIncoming && req.status === 'PENDING' && (
             <button
               className="req-cancel-action-btn"
@@ -168,10 +176,12 @@ export const SessionRequests = () => {
           )}
 
           {!isIncoming && req.status === 'ACCEPTED' && !hasMeeting && (
-            <span className="req-waiting">⏳ Waiting for tutor to send meeting link...</span>
+            <span className="req-waiting">
+              ⏳ Waiting for tutor to send meeting link...
+            </span>
           )}
 
-          {/* {!isIncoming && req.status === 'ACCEPTED' && hasMeeting && (
+          {!isIncoming && req.status === 'ACCEPTED' && hasMeeting && (
             <>
               <a
                 href={meeting.meetingLink}
@@ -181,19 +191,34 @@ export const SessionRequests = () => {
               >
                 🔗 Join Meeting
               </a>
-              <button
-                className="req-complete-btn"
-                onClick={() => doAction(() => requestsAPI.complete(req.id))}
-              >
-                ✓ Confirm Session Completed
-              </button>
+
+              {allowComplete ? (
+                <button
+                  className="req-complete-btn"
+                  onClick={() => doAction(() => requestsAPI.complete(req.id))}
+                >
+                  ✓ Confirm Session Completed
+                </button>
+              ) : (
+                <div className="req-complete-locked">
+                  <button className="req-complete-btn disabled" disabled>
+                    ✓ Confirm Session Completed
+                  </button>
+                  <span className="req-complete-hint">
+                    🔒 Available after{' '}
+                    {new Date(meeting.scheduledAt).toLocaleString()}
+                  </span>
+                </div>
+              )}
             </>
           )}
 
-          {!isIncoming && req.status === 'COMPLETED' && hasMeeting && (
+          {/* {!isIncoming && req.status === 'COMPLETED' && hasMeeting && (
             <button
               className="req-rate-btn"
-              onClick={() => navigate(`/ratings/submit?meetingId=${meeting.id}`)}
+              onClick={() =>
+                navigate(`/ratings/submit?meetingId=${meeting.id}`)
+              }
             >
               ⭐ Rate Tutor
             </button>
@@ -237,7 +262,10 @@ export const SessionRequests = () => {
           <div className="req-empty">
             No {tab} requests yet.
             {tab === 'outgoing' && (
-              <button className="req-find-btn" onClick={() => navigate('/search')}>
+              <button
+                className="req-find-btn"
+                onClick={() => navigate('/search')}
+              >
                 Find Tutors
               </button>
             )}

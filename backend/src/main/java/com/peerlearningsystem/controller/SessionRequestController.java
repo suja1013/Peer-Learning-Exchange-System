@@ -73,7 +73,16 @@ public class SessionRequestController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    
+
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<?> complete(@PathVariable Long id, Authentication auth) {
+        try {
+            return ResponseEntity.ok(
+                    sessionRequestService.completeSession(id, getUser(auth)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     private User getUser(Authentication auth) {
         return userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));

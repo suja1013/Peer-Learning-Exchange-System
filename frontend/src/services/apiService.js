@@ -65,6 +65,7 @@ export const requestsAPI = {
   accept:      (id)   => api.put(`/requests/${id}/accept`),
   reject:      (id)   => api.put(`/requests/${id}/reject`),
   cancel:      (id)   => api.put(`/requests/${id}/cancel`),
+  complete:    (id)   => api.put(`/requests/${id}/complete`), //F6
 };
 
 // F5: Meetings
