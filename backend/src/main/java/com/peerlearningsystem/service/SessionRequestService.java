@@ -1,6 +1,7 @@
 package com.peerlearningsystem.service;
 
 import com.peerlearningsystem.model.*;
+import com.peerlearningsystem.repository.MeetingRepository;
 import com.peerlearningsystem.repository.SessionRequestRepository;
 import com.peerlearningsystem.repository.SkillRepository;
 import com.peerlearningsystem.repository.UserRepository;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -19,6 +21,7 @@ public class SessionRequestService {
     private final SessionRequestRepository sessionRequestRepository;
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
+    private final MeetingRepository meetingRepository;
 
     @Value("${app.points.session-cost}")
     private Integer sessionCost;
@@ -113,6 +116,44 @@ public class SessionRequestService {
 
         request.setStatus(SessionRequest.RequestStatus.CANCELLED);
         return sessionRequestRepository.save(request);
+    }
+    //F6: COMPLETE a session — transfer points to tutor
+    @Transactional
+    public SessionRequest completeSession(Long requestId, User learner) {
+        SessionRequest request = getRequestOrThrow(requestId);
+
+        if (!request.getLearner().getId().equals(learner.getId())) {
+            throw new IllegalArgumentException("Only the learner can confirm session completion");
+        }
+        if (request.getStatus() != SessionRequest.RequestStatus.ACCEPTED) {
+            throw new IllegalArgumentException("Session must be ACCEPTED before it can be completed");
+        }
+
+        //Check meeting exists and scheduled time has passed
+        Meeting meeting = meetingRepository.findBySessionRequestId(requestId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No meeting has been created for this session yet"));
+
+        if (meeting.getScheduledAt() != null && LocalDateTime.now().isBefore(meeting.getScheduledAt())) {
+            throw new IllegalArgumentException(
+                    "Session cannot be confirmed before the scheduled time: " +
+                            meeting.getScheduledAt());
+        }
+
+        //Transfer points to tutor
+        User tutor = request.getTutor();
+        tutor.setActivationPoints(tutor.getActivationPoints() + request.getPointsDeducted());
+        userRepository.save(tutor);
+
+        //Update session request status
+        request.setStatus(SessionRequest.RequestStatus.COMPLETED);
+        sessionRequestRepository.save(request);
+
+        //Update meeting status to COMPLETED
+        meeting.setStatus(Meeting.MeetingStatus.COMPLETED);
+        meetingRepository.save(meeting);
+
+        return request;
     }
 
     public SessionRequest getRequestOrThrow(Long requestId) {
