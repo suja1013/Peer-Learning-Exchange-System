@@ -1,0 +1,233 @@
+/* ── Submit Rating page ── */
+.ratings-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.ratings-back-btn {
+  background: none;
+  border: none;
+  color: #4c51bf;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 16px;
+  padding: 0;
+}
+
+.ratings-title {
+  color: #2d3748;
+  margin-bottom: 24px;
+}
+
+.ratings-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ratings-error {
+  background: #fff5f5;
+  color: #c53030;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.ratings-prompt {
+  color: #4a5568;
+  font-size: 16px;
+  margin: 0;
+}
+
+.star-row {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 40px;
+  cursor: pointer;
+  color: #e2e8f0;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.1s;
+}
+
+.star-btn.star-filled {
+  color: #f6ad55;
+}
+
+.star-label {
+  color: #718096;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: -4px;
+}
+
+.ratings-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a5568;
+  margin-top: 4px;
+}
+
+.ratings-textarea {
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ratings-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.ratings-cancel-btn {
+  padding: 10px 20px;
+  background: #fff;
+  color: #718096;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.ratings-submit-btn {
+  padding: 10px 24px;
+  background: #4c51bf;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.ratings-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── TutorRatings page ── */
+.tr-avg-card {
+  background: linear-gradient(135deg, #4c51bf, #6b46c1);
+  color: #fff;
+  border-radius: 14px;
+  padding: 28px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.tr-avg-number {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tr-avg-label {
+  font-size: 14px;
+  opacity: 0.85;
+  margin-top: 8px;
+}
+
+.tr-no-ratings {
+  font-size: 16px;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.tr-stars {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin: 8px 0 4px;
+}
+
+.tr-star-on  { color: #f6ad55; font-size: 22px; }
+.tr-star-off { color: rgba(255,255,255,0.3); font-size: 22px; }
+
+.tr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tr-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.tr-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.tr-learner-name {
+  font-weight: 700;
+  color: #2d3748;
+  font-size: 15px;
+}
+
+.tr-skill {
+  font-size: 13px;
+  color: #4c51bf;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.tr-feedback {
+  color: #4a5568;
+  font-size: 14px;
+  font-style: italic;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: #f7fafc;
+  border-left: 3px solid #4c51bf;
+  border-radius: 4px;
+}
+
+.tr-date {
+  font-size: 12px;
+  color: #a0aec0;
+}
+
+/* ── "Rated" badge in requests list ── */
+.req-rated-badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: #276749;
+  padding: 8px 14px;
+  background: #c6f6d5;
+  border-radius: 8px;
+}
+
+/* ── "View My Ratings" button for tutor ── */
+.req-view-ratings-btn {
+  padding: 8px 18px;
+  background: #fffaf0;
+  color: #744210;
+  border: 1px solid #f6e05e;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
