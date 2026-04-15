@@ -76,4 +76,13 @@ export const meetingsAPI = {
   getByRequestId:   (requestId) => api.get(`/meetings/request/${requestId}`),
 };
 
+// F7: Ratings
+export const ratingsAPI = {
+  submit:  (data)     => api.post('/ratings', data),
+  getTutorRatings: (tutorId)  => api.get(`/ratings/tutor/${tutorId}`),
+  getTutorAvg:     (tutorId)  => api.get(`/ratings/tutor/${tutorId}/avg`),
+  checkByMeeting:  (meetingId) => api.get(`/ratings/meeting/${meetingId}`),
+};
+
+
 export default api;
