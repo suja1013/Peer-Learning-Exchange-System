@@ -11,6 +11,7 @@ import { SendRequest }     from './components/requests/SendRequest';
 import { Meetings, CreateMeeting } from './components/meetings/Meetings';
 import { SubmitRating } from './components/ratings/Ratings';
 import { TutorRatings, SessionRating } from './components/ratings/TutorRatings';
+import { AIRecommendations } from './components/recommendations/AIRecommendations';
 
 // Protected route wrapper
 const PrivateRoute = ({ children }) => {
@@ -28,6 +29,7 @@ const PageLayout = ({ children }) => (
         <a href="/search" style={navLinkStyle}>Find Tutors</a>
         <a href="/requests" style={navLinkStyle}>Requests</a>
         <a href="/meetings" style={navLinkStyle}>Meetings</a>
+         <a href="/recommendations" style={navLinkStyle}>AI Recommendations</a>
       </nav>
     </div>
     {children}
@@ -65,6 +67,8 @@ function AppRoutes() {
       <Route path="/ratings/submit" element={<PrivateRoute><SubmitRating /></PrivateRoute>} />
       <Route path="/ratings/tutor/:tutorId" element={<PrivateRoute><TutorRatings /></PrivateRoute>} />
       <Route path="/ratings/meeting/:meetingId" element={<PrivateRoute><SessionRating /></PrivateRoute>} />
+
+      <Route path="/recommendations" element={<PrivateRoute><AIRecommendations /></PrivateRoute>} />
 
       <Route path="/" element={<Navigate to="/dashboard" />} />
       <Route path="*" element={<Navigate to="/dashboard" />} />

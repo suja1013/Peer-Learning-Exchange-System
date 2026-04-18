@@ -84,5 +84,9 @@ export const ratingsAPI = {
   checkByMeeting:  (meetingId) => api.get(`/ratings/meeting/${meetingId}`),
 };
 
+// F8: AI Recommendations
+export const recommendationsAPI = {
+  get: (skill, limit = 10) => api.get('/recommendations', { params: { skill, limit } }),
+};
 
 export default api;
